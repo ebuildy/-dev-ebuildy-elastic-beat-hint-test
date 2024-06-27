@@ -1,0 +1,42 @@
+# Directories
+/.vagrant
+/.idea
+/.vscode
+/build
+/*/*.template*.json
+**/html_docs
+/vendor
+
+# Files
+elastic-beat-hint-test
+.DS_Store
+/beats.iml
+*.dev.yml
+*.generated.yml
+coverage.out
+.python-version
+beat.db
+*.keystore
+go_env.properties
+mage_output_file.go
+
+# Editor swap files
+*.swp
+*.swo
+*.swn
+
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.so
+*.exe
+*.test
+*.prof
+*.pyc
+
+# Terraform
+*.terraform
+*.tfstate*
+
+# Files generated with the bump version automations
+*.bck
