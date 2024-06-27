@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"net/http"
@@ -12,6 +13,15 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
+
+func splitLines(s string) []string {
+	var lines []string
+	sc := bufio.NewScanner(strings.NewReader(s))
+	for sc.Scan() {
+		lines = append(lines, sc.Text())
+	}
+	return lines
+}
 
 func formatToYAML(a any) string {
 	b := bytes.Buffer{}
@@ -65,8 +75,9 @@ func NewHTTPCommand() *cobra.Command {
 			r.GET("/", func(c *gin.Context) {
 				rawAnnotations := c.DefaultQuery("annotations", "enabled=true\nprocessors.drop_event={\"when\":{\"or\":[{\"equals\": {\"log.level\": \"info\"}}]}}")
 				hintsKey := c.DefaultQuery("key", "logs")
+				annotations := splitLines(rawAnnotations)
 
-				r := handleHTTPQuery(strings.Split(rawAnnotations, "\n"), hintsKey)
+				r := handleHTTPQuery(annotations, hintsKey)
 
 				c.HTML(http.StatusOK, "index.html", gin.H{
 					"annotations":  rawAnnotations,
