@@ -19,7 +19,7 @@ func TestBuildConfig(t *testing.T) {
 		},
 	}
 
-	config := buildConfig(hints)
+	config := buildConfig(hints, "logs")
 
 	b := bytes.Buffer{}
 	yamlEncoder := yaml.NewEncoder(&b)

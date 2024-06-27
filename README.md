@@ -7,8 +7,12 @@ Play with https://www.elastic.co/guide/en/beats/filebeat/current/configuration-a
 Prefix `co.elastic.logs` is added.
 
 ```sh
-CLI ANNOTATION_1 ANNOTATION_2 ....
-cli "enabled:true" "exclude_lines: '^{"log.level":"debug"(.*)$'"  "processors.drop_event: {\"when\":{\"or\":[{\"equals\": {\"log.level\": \"info\"}}]}}" "json.message_key: message"
+elastic-beat-hint-test -a k1=v1 -a k2=v2 ....
+elastic-beat-hint-test \
+    --annotation enabled=true \
+    -a exclude_lines='^{"log.level":"debug"(.*)$' \
+    -a "processors.drop_event={\"when\":{\"or\":[{\"equals\": {\"log.level\": \"info\"}}]}}" \
+    -a "json.message_key=message"
 ```
 
 ```yaml
