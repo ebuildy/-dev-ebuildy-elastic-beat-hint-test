@@ -49,10 +49,11 @@ func NewHTTPCommand() *cobra.Command {
 		Use:   "http",
 		Short: "Run HTTP API server",
 		Run: func(cmd *cobra.Command, args []string) {
-			r := gin.Default()
+			r := gin.New()
 			r.SetFuncMap(template.FuncMap{
 				"toYAML": formatToYAML,
 			})
+
 			r.LoadHTMLFiles("./template/index.html")
 
 			r.GET("/ping", func(c *gin.Context) {
