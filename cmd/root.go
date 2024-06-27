@@ -4,18 +4,19 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/elastic/elastic-agent-autodiscover/utils"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v3"
+	"go.uber.org/zap/zapcore"
 )
 
 var AnnotationPrefix = "co.elastic"
 var AllSupportedHints = []string{"enabled", "module", "metricsets", "hosts", "period", "timeout", "metrics_path", "username", "password", "stream", "processors", "multiline", "json", "disable", "ssl", "metrics_filters", "raw", "include_lines", "exclude_lines", "fileset", "pipeline", "raw"}
+
+var ZapLog *zap.SugaredLogger
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -26,56 +27,20 @@ var rootCmd = &cobra.Command{
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		logger, _ := zap.NewProduction()
-		defer logger.Sync() // flushes buffer, if any
-		sugar := logger.Sugar()
+}
 
-		flags := cmd.Flags()
-		hintsKey, err := flags.GetString("kind")
+func getHints(annotations mapstr.M) mapstr.M {
+	hints, incorrecthints := utils.GenerateHints(annotations, "", AnnotationPrefix, true, AllSupportedHints)
 
-		if err != nil {
-			sugar.Fatal(err)
-		}
+	for _, value := range incorrecthints {
+		ZapLog.Infof("provided hint: %s/%s is not in the supported list", AnnotationPrefix, value)
+	}
 
-		aFlags, err := flags.GetStringToString("annotation")
+	for _, value := range hints {
+		ZapLog.Infof("provided hint: %s/%s is OK list", AnnotationPrefix, value)
+	}
 
-		if err != nil {
-			sugar.Fatal(err)
-		}
-
-		annotations := make(mapstr.M, 0)
-
-		for k, v := range aFlags {
-			key := fmt.Sprintf("%s.%s/%s", AnnotationPrefix, hintsKey, k)
-
-			annotations.Put(key, v)
-
-			sugar.Infof("add annotation %s: %s", key, v)
-		}
-
-		hints, incorrecthints := utils.GenerateHints(annotations, "", AnnotationPrefix, true, AllSupportedHints)
-
-		for _, value := range incorrecthints {
-			sugar.Infof("provided hint: %s/%s is not in the supported list", AnnotationPrefix, value)
-		}
-
-		for _, value := range hints {
-			sugar.Infof("provided hint: %s/%s is OK list", AnnotationPrefix, value)
-		}
-
-		//annotations = getHintMapStr(annotations, AnnotationPrefix)
-
-		config := buildConfig(hints, hintsKey)
-
-		d, err := yaml.Marshal(config)
-
-		if err != nil {
-			sugar.Fatalf("error: %v", err)
-		}
-
-		fmt.Println(string(d))
-	},
+	return hints
 }
 
 /**
@@ -123,6 +88,20 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringP("kind", "k", "logs", "logs, metrics")
-	rootCmd.PersistentFlags().StringToStringP("annotation", "a", map[string]string{}, "annotation (eg: enabled=true)")
+	config := zap.NewProductionConfig()
+	enccoderConfig := zap.NewProductionEncoderConfig()
+	zapcore.TimeEncoderOfLayout("Jan _2 15:04:05.000000000")
+	enccoderConfig.StacktraceKey = "" // to hide stacktrace info
+	config.EncoderConfig = enccoderConfig
+
+	logger, err := config.Build(zap.AddCallerSkip(1))
+
+	if err != nil {
+		panic(err)
+	}
+
+	ZapLog = logger.Sugar()
+
+	rootCmd.AddCommand(NewAdhocCommand())
+	rootCmd.AddCommand(NewHTTPCommand())
 }

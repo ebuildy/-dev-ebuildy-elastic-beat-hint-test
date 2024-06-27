@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>elastic-beat-hint test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <h1>elastic-beat-hint tester</h1>
+        <p>Enter annotations, 1 by line, and get the result config</p>
+        <div class="row">
+            <div class="col-md-7">
+                <form method="get">
+                    <div class="form-group">
+                        <label for="annotations">Annotations</label>
+                        <textarea name="annotations" class="form-control" style="
+                    width: 100%;
+                    min-height: 150px;
+                    padding: 1em;
+                ">{{ .annotations }}</textarea>
+                    </div>
+                    <br />
+                    <input type="submit" class="btn btn-default" />
+                </form>
+            </div>
+            <div class="col-md-5">
+                <h2>Results</h2>
+                <figure class="highlight">
+                    <pre>
+                        <code class="language-yaml" data-lang="yaml">{{ .resultConfig | toYAML }}</code>
+                    </pre>
+                </figure>
+                <h3>Hints</h3>
+                <figure class="highlight">
+                    <pre><code class="language-yaml" data-lang="html">{{ .resultHints | toYAML }}</code></pre>
+                </figure>
+            </div>
+        </div>
+
+        <p class="text-center">
+            <a
+                href="https://github.com/ebuildy/elastic-beat-hint-test">https://github.com/ebuildy/elastic-beat-hint-test</a>
+        </p>
+    </div>
+</body>
+
+</html>
